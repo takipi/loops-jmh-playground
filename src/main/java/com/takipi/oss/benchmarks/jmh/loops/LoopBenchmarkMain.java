@@ -39,7 +39,7 @@ public class LoopBenchmarkMain {
 	public int iteratorMaxInteger() {
 		int max = Integer.MIN_VALUE;
 		for (Iterator<Integer> it = values.iterator(); it.hasNext(); ) {
-			max = Math.max(max, it.next());
+			max = Integer.max(max, it.next());
 		}
 		return max;
 	}
@@ -50,7 +50,7 @@ public class LoopBenchmarkMain {
 	public int forEachMaxInteger() {
 		int max = Integer.MIN_VALUE;
 		for (Integer value : values) {
-			max = Math.max(max, value);
+			max = Integer.max(max, value);
 		}
 		return max;
 	}
@@ -61,7 +61,7 @@ public class LoopBenchmarkMain {
 	public int forMaxInteger() {
 		int max = Integer.MIN_VALUE;
 		for (int i = 0; i < arraySize; i++) {
-			max = Math.max(max, values.get(i));
+			max = Integer.max(max, values.get(i));
 		}
 		return max;
 	}
