@@ -17,18 +17,18 @@ import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
 public class LoopBenchmarkMain {
-	volatile int arraySize = 100000;
-	volatile List<Integer> values = null;
+	volatile int size = 100000;
+	volatile List<Integer> integers = null;
 	
 	@Setup
 	public void setup() {
-		values = new ArrayList<Integer>(arraySize);
-		populate(values);
+		integers = new ArrayList<Integer>(size);
+		populate(integers);
 	}
 
 	public void populate(List<Integer> list) {
 		Random random = new Random();
-		for (int i = 0; i < arraySize; i++) {
+		for (int i = 0; i < size; i++) {
 			list.add(random.nextInt(1000000));
 		}
 	}
@@ -38,7 +38,7 @@ public class LoopBenchmarkMain {
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public int iteratorMaxInteger() {
 		int max = Integer.MIN_VALUE;
-		for (Iterator<Integer> it = values.iterator(); it.hasNext(); ) {
+		for (Iterator<Integer> it = integers.iterator(); it.hasNext(); ) {
 			max = Integer.max(max, it.next());
 		}
 		return max;
@@ -49,8 +49,8 @@ public class LoopBenchmarkMain {
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public int forEachMaxInteger() {
 		int max = Integer.MIN_VALUE;
-		for (Integer value : values) {
-			max = Integer.max(max, value);
+		for (Integer n : integers) {
+			max = Integer.max(max, n);
 		}
 		return max;
 	}
@@ -60,8 +60,8 @@ public class LoopBenchmarkMain {
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public int forMaxInteger() {
 		int max = Integer.MIN_VALUE;
-		for (int i = 0; i < arraySize; i++) {
-			max = Integer.max(max, values.get(i));
+		for (int i = 0; i < size; i++) {
+			max = Integer.max(max, integers.get(i));
 		}
 		return max;
 	}
@@ -70,7 +70,7 @@ public class LoopBenchmarkMain {
 	@BenchmarkMode(Mode.AverageTime)
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public int parallelStreamMaxInteger() {
-		Optional<Integer> max = values.parallelStream().reduce(Integer::max);
+		Optional<Integer> max = integers.parallelStream().reduce(Integer::max);
 		return max.get();
 	}
 
@@ -78,7 +78,7 @@ public class LoopBenchmarkMain {
 	@BenchmarkMode(Mode.AverageTime)
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public int streamMaxInteger() {
-		Optional<Integer> max = values.stream().reduce(Integer::max);
+		Optional<Integer> max = integers.stream().reduce(Integer::max);
 		return max.get();
 	}
 }
