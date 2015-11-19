@@ -6,7 +6,7 @@
 	<classpathentry kind="var" path="M2_REPO/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/openjdk/jmh/jmh-generator-annprocess/1.11.2/jmh-generator-annprocess-1.11.2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_60.jdk">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
