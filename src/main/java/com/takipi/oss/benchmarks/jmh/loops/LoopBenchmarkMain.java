@@ -28,7 +28,8 @@ public class LoopBenchmarkMain {
 		benchmark.setup();
 		
 		System.out.println("iteratorMaxInteger max is: " + benchmark.iteratorMaxInteger());
-		System.out.println("forEachMaxInteger max is: " + benchmark.forEachMaxInteger());
+		System.out.println("forEachLoopMaxInteger max is: " + benchmark.forEachLoopMaxInteger());
+		System.out.println("forEachLambdaMaxInteger max is: " + benchmark.forEachLambdaMaxInteger());
 		System.out.println("forMaxInteger max is: " + benchmark.forMaxInteger());
 		System.out.println("parallelStreamMaxInteger max is: " + benchmark.parallelStreamMaxInteger());
 		System.out.println("streamMaxInteger max is: " + benchmark.streamMaxInteger());
@@ -68,14 +69,37 @@ public class LoopBenchmarkMain {
 	@Fork(2)
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
-	public int forEachMaxInteger() {
+	public int forEachLoopMaxInteger() {
 		int max = Integer.MIN_VALUE;
 		for (Integer n : integers) {
 			max = Integer.max(max, n);
 		}
 		return max;
 	}
-
+	
+	@Benchmark
+	@BenchmarkMode(Mode.AverageTime)
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	@Fork(2)
+	@Measurement(iterations = 5)
+	@Warmup(iterations = 5)
+	public int forEachLambdaMaxInteger() {
+		final Wrapper wrapper = new Wrapper();
+		wrapper.inner = Integer.MIN_VALUE;
+		
+		integers.forEach(i -> helper(i, wrapper));
+		return wrapper.inner.intValue();
+	}
+	
+	public static class Wrapper {
+		public Integer inner; 
+	}
+	
+	private int helper(int i, Wrapper wrapper) {
+		wrapper.inner = Math.max(i, wrapper.inner);
+		return wrapper.inner;
+	}
+	
 	@Benchmark
 	@BenchmarkMode(Mode.AverageTime)
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
