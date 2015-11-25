@@ -17,4 +17,4 @@ Blog post about JMH benchmarking streams, forEach, etc: http://blog.takipi.com/b
 
 ## Acknowledgments
 
-Thanks: reinhapa, RichardWarburton, ybonnel for your comments and contribution!
+Thanks: [reinhapa](https://github.com/reinhapa), [RichardWarburton](https://github.com/RichardWarburton), [ybonnel](https://github.com/ybonnel) for your comments and contribution!
