@@ -137,6 +137,6 @@ public class LoopBenchmarkMain {
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
 	public int lambdaMaxInteger() {
-		return integers.stream().reduce(Integer.MIN_VALUE, (a, b) -> Integer.max(a, b));
+		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, (a, b) -> a >= b ? a : b);
 	}
 }
