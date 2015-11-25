@@ -87,17 +87,12 @@ public class LoopBenchmarkMain {
 		final Wrapper wrapper = new Wrapper();
 		wrapper.inner = Integer.MIN_VALUE;
 		
-		integers.forEach(i -> helper(i, wrapper));
-		return wrapper.inner.intValue();
+		integers.forEach(i -> wrapper.inner = Integer.max(i, wrapper.inner));
+		return wrapper.inner;
 	}
 	
 	public static class Wrapper {
-		public Integer inner; 
-	}
-	
-	private int helper(int i, Wrapper wrapper) {
-		wrapper.inner = Math.max(i, wrapper.inner);
-		return wrapper.inner;
+		public int inner;
 	}
 	
 	@Benchmark
@@ -121,8 +116,7 @@ public class LoopBenchmarkMain {
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
 	public int parallelStreamMaxInteger() {
-		Optional<Integer> max = integers.parallelStream().reduce(Integer::max);
-		return max.get();
+		return integers.parallelStream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, Integer::max);
 	}
 
 	@Benchmark
@@ -132,8 +126,7 @@ public class LoopBenchmarkMain {
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
 	public int streamMaxInteger() {
-		Optional<Integer> max = integers.stream().reduce(Integer::max);
-		return max.get();
+		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, Integer::max);
 	}
 	
 	@Benchmark
@@ -143,6 +136,6 @@ public class LoopBenchmarkMain {
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
 	public int lambdaMaxInteger() {
-		return integers.stream().reduce(Integer.MIN_VALUE, (a, b) -> Integer.max(a, b));
+		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, (a, b) -> a >= b ? a : b);
 	}
 }
