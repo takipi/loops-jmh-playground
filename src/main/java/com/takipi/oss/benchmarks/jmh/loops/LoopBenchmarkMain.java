@@ -127,8 +127,7 @@ public class LoopBenchmarkMain {
 	@Measurement(iterations = 5)
 	@Warmup(iterations = 5)
 	public int streamMaxInteger() {
-		Optional<Integer> max = integers.stream().reduce(Integer::max);
-		return max.get();
+		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, Integer::max);
 	}
 	
 	@Benchmark
