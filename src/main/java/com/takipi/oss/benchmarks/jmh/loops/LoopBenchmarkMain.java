@@ -87,17 +87,12 @@ public class LoopBenchmarkMain {
 		final Wrapper wrapper = new Wrapper();
 		wrapper.inner = Integer.MIN_VALUE;
 		
-		integers.forEach(i -> helper(i, wrapper));
-		return wrapper.inner.intValue();
+		integers.forEach(i -> wrapper.inner = Integer.max(i, wrapper.inner));
+		return wrapper.inner;
 	}
 	
 	public static class Wrapper {
-		public Integer inner; 
-	}
-	
-	private int helper(int i, Wrapper wrapper) {
-		wrapper.inner = Math.max(i, wrapper.inner);
-		return wrapper.inner;
+		public int inner;
 	}
 	
 	@Benchmark
