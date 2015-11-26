@@ -35,7 +35,7 @@ public class ByteArrayLoopBenchmark {
     public void setup() {
         arrays = new ArrayList<>(size);
 
-        Random random = new Random();
+        Random random = new Random(123_456_789);
         for (int i = 0; i < size; i++) {
             byte[] arr = new byte[byteArrLength];
             random.nextBytes(arr);
