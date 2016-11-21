@@ -1,11 +1,5 @@
 package com.takipi.oss.benchmarks.jmh.loops;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -13,144 +7,222 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+
 @State(Scope.Benchmark)
 public class LoopBenchmarkMain {
-	final int size = 100000;
-	List<Integer> integers = null;
+    private static final int size = 10000000;
+    private static final int[] array = new int[size];
+    private static final List<Integer> integers = setup();
+    private static final Wrapper wrapper = new Wrapper();
 
-	public static void main(String[] args) {
-		LoopBenchmarkMain benchmark = new LoopBenchmarkMain();
-		benchmark.setup();
-		
-		System.out.println("iteratorMaxInteger max is: " + benchmark.iteratorMaxInteger());
-		System.out.println("forEachLoopMaxInteger max is: " + benchmark.forEachLoopMaxInteger());
-		System.out.println("forEachLambdaMaxInteger max is: " + benchmark.forEachLambdaMaxInteger());
-		System.out.println("forMaxInteger max is: " + benchmark.forMaxInteger());
-		System.out.println("forMax2Integer max is: " + benchmark.forMax2Integer());
-		System.out.println("parallelStreamMaxInteger max is: " + benchmark.parallelStreamMaxInteger());
-		System.out.println("streamMaxInteger max is: " + benchmark.streamMaxInteger());
-		System.out.println("lambdaMaxInteger max is: " + benchmark.lambdaMaxInteger());
-	}
-	
-	@Setup
-	public void setup() {
-		integers = new ArrayList<Integer>(size);
-		populate(integers);
-	}
 
-	public void populate(List<Integer> list) {
-		Random random = new Random();
-		for (int i = 0; i < size; i++) {
-			list.add(Integer.valueOf(random.nextInt(1000000)));
-		}
-	}
+    public static void main(String[] args) {
+        LoopBenchmarkMain benchmark = new LoopBenchmarkMain();
+        benchmark.setup();
 
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int iteratorMaxInteger() {
-		int max = Integer.MIN_VALUE;
-		for (Iterator<Integer> it = integers.iterator(); it.hasNext(); ) {
-			max = Integer.max(max, it.next().intValue());
-		}
-		return max;
-	}
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int forEachLoopMaxInteger() {
-		int max = Integer.MIN_VALUE;
-		for (Integer n : integers) {
-			max = Integer.max(max, n.intValue());
-		}
-		return max;
-	}
-	
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int forEachLambdaMaxInteger() {
-		final Wrapper wrapper = new Wrapper();
-		wrapper.inner = Integer.MIN_VALUE;
-		
-		integers.forEach(i -> wrapper.inner = Integer.max(i.intValue(), wrapper.inner));
-		return wrapper.inner;
-	}
-	
-	public static class Wrapper {
-		public int inner; 
-	}
-	
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int forMaxInteger() {
-		int max = Integer.MIN_VALUE;
-		for (int i = 0; i < size; i++) {
-			max = Integer.max(max, integers.get(i).intValue());
-		}
-		return max;
-	}
-	
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int forMax2Integer() {
-		int max = Integer.MIN_VALUE;
-		List<Integer> integersLocal = integers;
-		for (int i = 0; i < size; i++) {
-			max = Integer.max(max, integersLocal.get(i).intValue());
-		}
-		return max;
-	}
+    public static List<Integer> setup() {
+        ArrayList<Integer> list = new ArrayList<>(size);
+        populate(list);
+        return list;
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int parallelStreamMaxInteger() {
-		return integers.parallelStream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, Integer::max);
-	}
+    public static void populate(List<Integer> list) {
+        Random random = new Random();
+        for (int i = 0; i < size; i++) {
+            int value = random.nextInt(MAX_VALUE);
+            list.add(value);
+            array[i] = value;
+        }
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int streamMaxInteger() {
-		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, Integer::max);
-	}
-	
-	@Benchmark
-	@BenchmarkMode(Mode.AverageTime)
-	@OutputTimeUnit(TimeUnit.MILLISECONDS)
-	@Fork(2)
-	@Measurement(iterations = 5)
-	@Warmup(iterations = 5)
-	public int lambdaMaxInteger() {
-		return integers.stream().mapToInt(Integer::intValue).reduce(Integer.MIN_VALUE, (a, b) -> Integer.max(a, b));
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int iteratorMaxInteger() {
+        int max = MIN_VALUE;
+        for (Iterator<Integer> it = integers.iterator(); it.hasNext(); ) {
+            max = max(max, it.next().intValue());
+        }
+        return max;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int forEachLoopMaxInteger() {
+        int max = MIN_VALUE;
+        for (Integer n : integers) {
+            max = max(max, n.intValue());
+        }
+        return max;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int forEachArrayLoopMaxInteger() {
+        int max = MIN_VALUE;
+        for (int n : array) {
+            max = max(max, n);
+        }
+        return max;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int collectionsMaxInteger() {
+        final int[] max = {MIN_VALUE};
+        integers.forEach((i) -> {
+            int b = max[0];
+            max[0] = Math.max(i.intValue(), b);
+        });
+        return max[0];
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int collectionsMax2Integer() {
+        wrapper.inner = MIN_VALUE;
+        integers.forEach((i) -> wrapper.inner = Math.max(i.intValue(), wrapper.inner = MIN_VALUE));
+        return wrapper.inner;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int forEachLambdaMaxInteger() {
+        wrapper.inner = MIN_VALUE;
+        integers.forEach(i -> wrapper.inner = max(i.intValue(), wrapper.inner));
+        return wrapper.inner;
+    }
+
+    private static class Wrapper {
+        int inner;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int forMaxInteger() {
+        int max = MIN_VALUE;
+        for (int i = 0; i < size; i++) {
+            max = max(max, integers.get(i).intValue());
+        }
+        return max;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int forMax2Integer() {
+        int max = MIN_VALUE;
+        for (int i = 0; i < size; i++) {
+            max = max(max, integers.get(i).intValue());
+        }
+        return max;
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int parallelStreamMaxInteger() {
+        return integers.parallelStream().mapToInt(Integer::intValue).reduce(MIN_VALUE, Math::max);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int parallelArrayStreamMaxInteger() {
+        return IntStream.of(array).parallel().reduce(MIN_VALUE, Math::max);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int parallelArrayStreamMax2Integer() {
+        return IntStream.of(array).parallel().max().getAsInt();
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int streamMaxInteger() {
+        return integers.stream().mapToInt(Integer::intValue).reduce(MIN_VALUE, Math::max);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+    public int streamArrayMaxInteger() {
+        return IntStream.of(array).reduce(MIN_VALUE, Math::max);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Fork(2)
+    @Measurement(iterations = 5)
+    @Warmup(iterations = 5)
+
+    public int streamArrayMax2Integer() {
+        return IntStream.of(array).max().getAsInt();
+    }
+
+
 }
